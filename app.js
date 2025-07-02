@@ -31,52 +31,69 @@ let posts = [
     },
 ];
 
-// ✅ Redirect root route to /posts
+// ✅ Root route redirects to /posts
 app.get("/", (req, res) => {
     res.redirect("/posts");
 });
 
+// ✅ Show all posts
 app.get("/posts", (req, res) => {
     res.render("index.ejs", { posts });
 });
 
+// ✅ Create new post form
 app.get("/posts/new", (req, res) => {
     res.render("new.ejs");
 });
 
+// ✅ Handle new post submission
 app.post("/posts", (req, res) => {
-    let { username, content } = req.body;
-    let id = uuidv4();
+    const { username, content } = req.body;
+    const id = uuidv4();
     posts.push({ id, username, content });
     res.redirect("/posts");
 });
 
+// ✅ Show single post with 404 check
 app.get("/posts/:id", (req, res) => {
-    let { id } = req.params;
-    let post = posts.find((p) => id === p.id);
+    const { id } = req.params;
+    const post = posts.find((p) => id === p.id);
+    if (!post) {
+        return res.status(404).send("Post not found");
+    }
     res.render("show.ejs", { post });
 });
 
+// ✅ Edit post form with 404 check
+app.get("/posts/:id/edit", (req, res) => {
+    const { id } = req.params;
+    const post = posts.find((p) => id === p.id);
+    if (!post) {
+        return res.status(404).send("Post not found");
+    }
+    res.render("edit.ejs", { post });
+});
+
+// ✅ Update post content
 app.patch("/posts/:id", (req, res) => {
-    let { id } = req.params;
-    let newContent = req.body.content;
-    let post = posts.find((p) => id === p.id);
+    const { id } = req.params;
+    const newContent = req.body.content;
+    const post = posts.find((p) => id === p.id);
+    if (!post) {
+        return res.status(404).send("Post not found");
+    }
     post.content = newContent;
     res.redirect("/posts");
 });
 
-app.get("/posts/:id/edit", (req, res) => {
-    let { id } = req.params;
-    let post = posts.find((p) => id === p.id);
-    res.render("edit.ejs", { post });
-});
-
+// ✅ Delete post
 app.delete("/posts/:id", (req, res) => {
-    let { id } = req.params;
+    const { id } = req.params;
     posts = posts.filter((p) => id !== p.id);
     res.redirect("/posts");
 });
 
+// ✅ Start server
 app.listen(port, () => {
     console.log(`listening to port : ${port}`);
 });
